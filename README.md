@@ -77,7 +77,7 @@ cpu -> setCounter(0xF800);
 while (cpu -> getCounter() > 0)
 {
     // Читает команды с 0xF800 пока программный счетчик не
-    // встретит команду `NOP` (0x00)
+    // встретит команду NOP (0x00)
     
     cpu -> clock();  
 }
@@ -92,20 +92,7 @@ void clock();
 void reset();
 ```
 
-Каждая инструкция выполняется за определенное количество циклов (clock cycles). Один вызов `clock()` эмулирует один такт. Например, для выполнения операции `MOV R,R` необходимо вызвать `clock()` 5 раз. Причем, операция будет выполнена в первый вызов, а последующие будут эмулировать число тактов.
-
-```cpp
-void Cpu::clock()
-{
-    if (cycles > 0)
-    {
-        cycles--;
-        return;
-    }
-
-    // Чтение опкода, выполнение операции
-}
-```
+Каждая инструкция выполняется за определенное количество циклов (_clock cycles_). Один вызов `clock()` эмулирует один такт. Например, для выполнения операции `MOV R,R` необходимо вызвать `clock()` 5 раз. Причем, операция будет выполнена в первый вызов, а последующие нужны для эмуляции нужного числа тактов.
 
 ### Недокументированные операции
 
@@ -146,16 +133,16 @@ void Cpu::clock()
 
 ## Компиляция и запуск
 
-~~~
-$ make 
-g++ -std=c++14 -c -Wall -DLOGTEST example.cpp
-g++ -std=c++14 -c -Wall -DLOGTEST cpu.cpp
-g++ -std=c++14 -c -Wall -DLOGTEST status.cpp
-g++ -std=c++14 -c -Wall -DLOGTEST asmlog.cpp
-g++ example.o cpu.o status.o asmlog.o -o cpu
+По-умолчанию, код собирается с ключем `LOGTEST` для чтения результатов прохождения тестов. Для сборки потребуется компилятор с поддержкой C++ 14.
 
+```shell
 $ make run
-~~~
+g++ -std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST Example.cpp
+g++ -std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST Cpu.cpp
+g++ -std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST Status.cpp
+g++ -std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST Asmlog.cpp
+g++ -lstdc++ Example.o Cpu.o Status.o Asmlog.o -o cpu
+```
 
 ## Диагностика
 
@@ -164,14 +151,18 @@ $ make run
 
 [8080/8085 CPU Exerciser](https://altairclone.com/downloads/cpu_tests/8080_8085%20CPU%20Exerciser.pdf)
     
-### 8080.com
+### 8080
+
+8080/8085 CPU Diagnostic, version 1.0, by Microcosm Associates (Kelly Smith)
 
     MICROCOSM ASSOCIATES 8080/8085 CPU DIAGNOSTIC VERSION 1.0  (C) 1980
 
     CPU IS OPERATIONAL
     
-### CPUTEST.com
+### CPUTEST
 
+Тест процессора SuperSoft Associates из пакета Diagnostic II
+    
     DIAGNOSTICS II V1.2 - CPU TEST
     COPYRIGHT (C) 1981 - SUPERSOFT ASSOCIATES
 
@@ -181,11 +172,13 @@ $ make run
     END TIMING TEST
     CPU TESTS OK
     
-### 8080PRE.com
+### 8080PRE
+
+Предварительный тест для тренажера 8080EXM (Ian Bartholomew and Frank Cringles)
 
     8080 Preliminary tests complete
     
-### 8080EXM.com
+### 8080EXM
 
     8080 instruction exerciser
 
