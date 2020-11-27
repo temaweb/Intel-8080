@@ -4,34 +4,36 @@ CC=g++
 # Target
 TARGET=cpu
 
+# Buld directory
+BUILDDIR=build
+SOURCEDIR=.
+
 # Compiller flags
 #
-# -DASMLOG  - Show assembler logs
-# -DLOGTEST - Run in test mode
+# ASMLOG  - Show assembler logs
+# LOGTEST - Run in test mode
+
 CFLAGS=-std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST
-LFLAGS=-lstdc++
+LDFLAGS=-lstdc++
 
-all: $(TARGET)
+SOURCES=$(wildcard $(SOURCEDIR)/*.cpp)
+OBJECTS=$(patsubst $(SOURCEDIR)/%.cpp,$(BUILDDIR)/%.o,$(SOURCES))
 
+all: dir $(SOURCES) $(BUILDDIR)/$(TARGET)
+
+dir:
+	mkdir -p $(BUILDDIR)
+    
 .PHONY: all clean
 
-$(TARGET): example.o cpu.o status.o asmlog.o
-	$(CC) $(LFLAGS) Example.o Cpu.o Status.o Asmlog.o -o $(TARGET)
+$(BUILDDIR)/$(TARGET): $(OBJECTS)
+	$(CC) $^ -o $@
 
-asmlog.o: Asmlog.cpp
-	$(CC) $(CFLAGS) Asmlog.cpp
-	
-status.o: Status.cpp
-	$(CC) $(CFLAGS) Status.cpp
-
-cpu.o: Cpu.cpp
-	$(CC) $(CFLAGS) Cpu.cpp
-
-example.o: Example.cpp
-	$(CC) $(CFLAGS) Example.cpp
+$(OBJECTS): $(BUILDDIR)/%.o : $(SOURCEDIR)/%.cpp
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o $(TARGET)
+	rm -f $(BUILDDIR)/*o $(BUILDDIR)/$(TARGET)
 	
 run: all
-	@./$(TARGET)
+	@./$(BUILDDIR)/$(TARGET)
