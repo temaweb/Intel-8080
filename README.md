@@ -136,11 +136,6 @@ void reset();
 
 ```shell
 $ make run
-g++ -std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST Example.cpp
-g++ -std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST Cpu.cpp
-g++ -std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST Status.cpp
-g++ -std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST Asmlog.cpp
-g++ -lstdc++ Example.o Cpu.o Status.o Asmlog.o -o cpu
 ```
 
 ## Диагностика
