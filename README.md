@@ -2,8 +2,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![C/C++ CI](https://github.com/temaweb/8080/workflows/C/C++%20CI/badge.svg)
 
-Эмулятор процессора [Intel 8080](https://en.wikipedia.org/wiki/Intel_8080).
-Аналог:  ([КР580ВМ80А](https://en.wikipedia.org/wiki/KR580VM80A))
+Эмулятор процессора [Intel 8080](https://en.wikipedia.org/wiki/Intel_8080). Аналог: [КР580ВМ80А](https://en.wikipedia.org/wiki/KR580VM80A)
 
 * Дата анонса: апрель 1974 года
 * Тактовая частота: 2 МГц (позже 2,5 МГц, 3,1 МГц и 4 МГц)
