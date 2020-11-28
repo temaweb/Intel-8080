@@ -93,7 +93,7 @@ void reset();
 
 Каждая инструкция выполняется за определенное количество циклов (_clock cycles_). Один вызов `clock()` эмулирует один такт. Например, для выполнения операции `MOV R,R` необходимо вызвать `clock()` 5 раз. Причем, операция будет выполнена в первый вызов, а последующие нужны для эмуляции нужного числа тактов.
 
-### Недокументированные операции
+## Недокументированные операции
 
 Эмулятор обрабатывает недокументированные операции
 
@@ -105,7 +105,7 @@ void reset();
 0xFD: CALL 00 00
 ```
 
-### Нереализованные операции
+## Нереализованные операции
 
 В эмуляторе отсутствует поддержка установки флага прерывания и поддержка спящего режима.
 
@@ -147,16 +147,12 @@ $ make run
     
 ### 8080
 
-8080/8085 CPU Diagnostic, version 1.0, by Microcosm Associates (Kelly Smith)
-
     MICROCOSM ASSOCIATES 8080/8085 CPU DIAGNOSTIC VERSION 1.0  (C) 1980
 
     CPU IS OPERATIONAL
     
 ### CPUTEST
 
-Тест процессора SuperSoft Associates из пакета Diagnostic II
-    
     DIAGNOSTICS II V1.2 - CPU TEST
     COPYRIGHT (C) 1981 - SUPERSOFT ASSOCIATES
 
@@ -167,8 +163,6 @@ $ make run
     CPU TESTS OK
     
 ### 8080PRE
-
-Предварительный тест для тренажера 8080EXM (Ian Bartholomew and Frank Cringles)
 
     8080 Preliminary tests complete
     
