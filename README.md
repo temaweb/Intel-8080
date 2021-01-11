@@ -17,7 +17,7 @@
 Эмулятор позволяет подключать объекты, реализующие шаблон IO<T> для обмена данными с памятью или устройствами. 
     
 ```cpp
-template<class T>
+template<typename T>
 class IO
 {
 public:
@@ -44,11 +44,11 @@ private:
     std::array<uint8_t, 64 * 1024> ram {};
     
 public:
-    virtual uint8_t read(uint16_t address) const override final {
+    virtual uint8_t read(uint16_t address) const override {
         return ram[address];
     }
     
-    virtual void write(uint16_t address, uint8_t data) override final {
+    virtual void write(uint16_t address, uint8_t data) override {
         ram[address] = data;
     }
 };
