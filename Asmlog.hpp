@@ -15,34 +15,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IO_hpp
-#define IO_hpp
+#ifndef Asmlog_hpp
+#define Asmlog_hpp
 
-#include <iostream>
+#include <cstdint>
 
-template<typename T>
-class IO
+class Cpu;
+
+class Asmlog
 {
-public:
-    virtual uint8_t read(T address) const = 0;
-    virtual void write(T address, uint8_t data) = 0;
+private:
+    constexpr static char delimiter = ' ';
+    constexpr static char filler    = '0';
     
-    virtual ~IO() = default;
+    template<typename T>
+    static void print(int width, std::string prefix, T value);
+    
+    static void printDivider(int width);
+    
+public:
+    static void log(uint16_t counter, const Cpu * cpu);
 };
 
-template<typename T>
-class DefaultIO final : public IO<T>
-{
-public:
-    virtual uint8_t read(T) const override
-    {
-        return 0x00;
-    }
-    
-    virtual void write(T, uint8_t) override
-    {
-        
-    }
-};
-
-#endif /* IO_hpp */
+#endif /* Asmlog_hpp */

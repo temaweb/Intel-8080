@@ -53,8 +53,10 @@ private:
   
 public:
     
-    Status& operator=(const uint8_t & status);
-    operator uint8_t ();
+    Status() = default;
+    Status(uint8_t status);
+
+    operator uint8_t () const;
     
 public:
 
@@ -78,11 +80,11 @@ public:
     
 public:
     
-    uint8_t GetSign();
-    uint8_t GetZero();
-    uint8_t GetAux();
-    uint8_t GetParity();
-    uint8_t GetCarry();
+    uint8_t GetSign()   const;
+    uint8_t GetZero()   const;
+    uint8_t GetAux()    const;
+    uint8_t GetParity() const;
+    uint8_t GetCarry()  const;
 };
 
 #endif /* Status_hpp */

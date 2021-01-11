@@ -17,13 +17,12 @@
 
 #include "Status.hpp"
 
-Status& Status::operator= (const uint8_t & status)
+Status::Status(uint8_t status)
 {
     this -> status = (status & 0xD7) | defaultState;
-    return *this;
 }
 
-Status::operator uint8_t ()
+Status::operator uint8_t() const
 {
     return this -> status;
 }
@@ -121,27 +120,27 @@ void Status::SetDecFlags (uint16_t value)
 #pragma mark -
 #pragma mark Get flags
 
-uint8_t Status::GetSign()
+uint8_t Status::GetSign() const
 {
     return (status & S) >> 7;
 }
 
-uint8_t Status::GetZero()
+uint8_t Status::GetZero() const
 {
     return (status & Z) >> 6;
 }
 
-uint8_t Status::GetAux()
+uint8_t Status::GetAux() const
 {
     return (status & AC) >> 4;
 }
 
-uint8_t Status::GetParity()
+uint8_t Status::GetParity() const
 {
     return (status & P) >> 2;
 }
 
-uint8_t Status::GetCarry()
+uint8_t Status::GetCarry() const
 {
     return (status & C);
 }

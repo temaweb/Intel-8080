@@ -22,24 +22,20 @@
 #include "Cpu.hpp"
 
 // Test starting at
-static const uint16_t begin = 0x0100;
-
-// Exerciser path
-static const std::string exercisers[4]
-{
-    "exerciser/CPUTEST.com",
-    "exerciser/8080.com",
-    "exerciser/8080PRE.com",
-    "exerciser/8080EXM.com"
-};
+static const uint16_t offset = 0x0100;
 
 class Bus : public IO<uint16_t>
 {
 private:
-    
     // 64 KB
     // This is max address space for Intel 8080
-    std::array<uint8_t, 64 * 1024> memory {};
+    using ram = std::array<uint8_t, 64 * 1024>;
+
+    // Memory array
+    ram memory {};
+    
+    // Bus test initializer
+    friend void load(std::string path, const std::shared_ptr<Bus> & bus);
     
 public:
     Bus()
@@ -53,36 +49,40 @@ public:
         write(0x0007, 0xC9); // 0007: RET
     }
     
-    uint8_t read(uint16_t address) const override final {
+    virtual uint8_t read(uint16_t address) const override {
         return memory[address];
     }
     
-    void write(uint16_t address, uint8_t data) override final {
+    virtual void write(uint16_t address, uint8_t data) override {
         memory[address] = data;
+    }
+    
+private:
+    ram::iterator begin()
+    {
+        return memory.begin() + ::offset;
+    }
+    
+    ram::size_type size()
+    {
+        return memory.size();
     }
 };
 
-void load(std::string path, std::shared_ptr<Bus> bus)
+
+void load(std::string path, const std::shared_ptr<Bus> & bus)
 {
     std::ifstream file(path, std::ios::in | std::ios::binary);
-    
-    auto offset = begin;
-    char buffer = 0x00;
-    
+
     if (!file.is_open())
     {
         std::cerr << "File not found " << path;
-        exit(-1);
+        exit(EXIT_FAILURE);
         
         return;
     }
     
-    while (!file.eof())
-    {
-        file.read(&buffer, sizeof(char));
-        bus -> write(offset++, buffer);
-    }
-
+    file.read((std::ifstream::char_type *) bus -> begin(), (std::streamsize) bus -> size());
     file.close();
 }
 
@@ -96,7 +96,7 @@ void execute(std::string exerciser)
     cpu -> connect(bus);
     
     // Set program counter to begin test (0x0100)
-    cpu -> setCounter(begin);
+    cpu -> setCounter(offset);
     
     load(exerciser, bus);
 
@@ -111,7 +111,21 @@ void execute(std::string exerciser)
 
 int main(int argc, const char * argv[])
 {
-#ifdef LOGTEST
+#ifndef LOGTEST
+    std::cout << "Recomplile with -DLOGTEST key for run tests";
+    std::cout << std::endl;
+    
+    return 0;
+#endif
+    
+    const std::string exercisers[4]
+    {
+        "exerciser/CPUTEST.com",
+        "exerciser/8080.com",
+        "exerciser/8080PRE.com",
+        "exerciser/8080EXM.com"
+    };
+
     for (auto exerciser : exercisers)
     {
         std::cout << "\033[1;31m";
@@ -123,9 +137,6 @@ int main(int argc, const char * argv[])
         std::cout << std::endl;
         std::cout << std::endl;
     }
-#else
-    std::cout << "Recomplile with -DLOGTEST key for run tests" << std::endl;
-#endif
-    
+
     return 0;
 }

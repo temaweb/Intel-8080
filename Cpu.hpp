@@ -19,25 +19,24 @@
 #define Cpu_hpp
 
 #include <cstdint>
-#include <string>
 #include <vector>
 #include <functional>
 #include <memory>
 
-#include "IO.hpp"
+#include "Asmlog.hpp"
+#include "Command.hpp"
 #include "Status.hpp"
+#include "IO.hpp"
 
 class Cpu
 {
 public:
-    
     Cpu();
-    ~Cpu() { };
     
 private:
     
-    uint8_t  registers[8];       // Registers
-    uint8_t * regpairs[3];       // Pairs
+    uint8_t  registers[8] {};    // Registers
+    uint8_t * regpairs[3] {};    // Pairs
     
     uint8_t  opcode  = 0x00;     // Operation code
     uint8_t  cycles  = 0x00;     // Cycle counter
@@ -49,12 +48,15 @@ private:
     uint64_t ticks   = 0x0L;     // Clock counter
     
     Status status;               // Status register
-
-    friend void log(uint16_t pcl, Cpu * cpu);
     
-private:
+    // Intel 8080 operation list
+    std::vector<Command> commands;
     
-    enum
+    // Disassembler
+    friend void Asmlog::log(uint16_t counter, const Cpu * cpu);
+    friend struct Command;
+    
+    enum Registers
     {
         B, //  0x00 - B
         C, //  0x01 - C
@@ -66,32 +68,44 @@ private:
         A  //  0x07 - A - Accumulator
     };
     
-    enum
+    enum Pairs
     {
         BC, //  0x00 - B & C
         DE, //  0x01 - D & E
         HL, //  0x02 - H & L
     };
     
-    uint8_t * readsrc();
-    uint8_t * readdst();
+    // Memory bus
+    std::shared_ptr<IO<uint16_t>> bus = std::make_shared<DefaultIO<uint16_t>>();
     
-    uint16_t readpair (uint8_t index);
-    void writepair    (uint8_t index, uint16_t data);
-    void mutatepair   (uint8_t index, std::function<void(uint16_t &)> mutator);
+    // Device communication
+    std::shared_ptr<IO<uint8_t>> io = std::make_shared<DefaultIO<uint8_t>>();
+    
+private:
+    
+    // Read source data from memory target
+    // See memory modes
+    uint8_t readsrc();
+    
+    // Return destination of memory target
+    uint8_t & readdst();
+    
+    // Return registry pair value
+    uint16_t readpair (uint8_t index) const;
+    
+    void writepair  (uint8_t index, uint16_t data);
+    void mutatepair (uint8_t index, std::function<void(uint16_t &)> mutator);
     
 // Communication
 private:
     
-    std::shared_ptr<IO<uint16_t>> bus = std::make_shared<DefaultIO<uint16_t>>();
-    std::shared_ptr<IO<uint8_t>>  io  = std::make_shared<DefaultIO<uint8_t>>();
-    
-    uint8_t read ();
-    uint8_t read (uint16_t address);
+    uint8_t read () const;
+    uint8_t read (uint16_t address) const;
     
     void write (uint8_t  data);
     void write (uint16_t address, uint8_t data);
     
+// Memory modes
 private:
     
     void IMP(); // Implied
@@ -100,6 +114,7 @@ private:
     void DIR(); // Direct
     void HLM(); // Direct HL
     
+// Operations
 private:
     
     // Move, Load, Store
@@ -266,34 +281,19 @@ private:
     uint8_t NOP  ();
     uint8_t HLT  ();
 
-private:
-    
-    struct Command
-    {
-        // Operation name
-        std::string name;
-        
-        // Operation cycles
-        uint8_t cycles = 0x00;
-        
-        uint8_t (Cpu::*operate) (void) = nullptr;
-        void    (Cpu::*addrmod) (void) = nullptr;
-    };
-
-    std::vector<Command> lookup;
-    
 public:
     
     void clock();
     void reset();
 
-    void     setCounter(uint16_t counter);
-    uint16_t getCounter();
+    void setCounter(uint16_t counter);
     
     void connect (std::shared_ptr<IO<uint16_t>> bus);
     void connect (std::shared_ptr<IO<uint8_t>>  io);
+    
+    uint16_t getCounter();
+    
+    virtual ~Cpu() = default;
 };
-
-void log(uint16_t pcl, Cpu * cpu);
 
 #endif /* Cpu_hpp */

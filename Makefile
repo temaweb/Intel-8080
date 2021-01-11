@@ -9,10 +9,6 @@ BUILDDIR=build
 SOURCEDIR=.
 
 # Compiller flags
-#
-# ASMLOG  - Show assembler logs
-# LOGTEST - Run in test mode
-
 CFLAGS=-std=c++14 -c -Wall -Wno-unknown-pragmas -DLOGTEST
 LDFLAGS=-lstdc++
 

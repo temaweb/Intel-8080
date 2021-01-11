@@ -15,19 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define ASMLOG
+
 #include "Cpu.hpp"
 
-Cpu::Cpu() : registers { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+Cpu::Cpu() 
 {
     regpairs[BC] = registers + B;
     regpairs[DE] = registers + D;
     regpairs[HL] = registers + H;
     
-    lookup =
+    commands = 
     {
-        // NAME      CYCLES    OPERATION       ADDRMOD
-        // -----------------------------------------------
-        
         // 0x00 - 0x0F
         
         { "NOP",     4,        &Cpu::NOP,      &Cpu::IMP },
@@ -103,6 +102,7 @@ Cpu::Cpu() : registers { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
         { "DCR",     5,        &Cpu::DCRR,     &Cpu::IMP },
         { "MVI",     7,        &Cpu::MVIR,     &Cpu::IMM },
         { "CMC",     4,        &Cpu::CMC,      &Cpu::IMP },
+        
         
         // 0x04 - 0x0F
         
@@ -269,7 +269,7 @@ Cpu::Cpu() : registers { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
         { "RZ",      5,        &Cpu::RZ,       &Cpu::IMP },
         { "RET",    10,        &Cpu::RET,      &Cpu::IMP },
         { "JZ",     10,        &Cpu::JZ,       &Cpu::DIR },
-        { "JMP",    10,        &Cpu::JMP,      &Cpu::DIR }, // Undocumented
+        { "JMP",    10,        &Cpu::JMP,      &Cpu::DIR },
         { "CZ",     11,        &Cpu::CZ,       &Cpu::DIR },
         { "CALL",   17,        &Cpu::CALL,     &Cpu::DIR },
         { "ACI",     7,        &Cpu::ACI,      &Cpu::IMM },
@@ -286,11 +286,11 @@ Cpu::Cpu() : registers { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
         { "SUI",     7,        &Cpu::SUI,      &Cpu::IMM },
         { "RST",    11,        &Cpu::RST,      &Cpu::IMP },
         { "RC",      5,        &Cpu::RC,       &Cpu::IMP },
-        { "RET",    10,        &Cpu::RET,      &Cpu::IMP }, // Undocumented
+        { "RET",    10,        &Cpu::RET,      &Cpu::IMP },
         { "JC",     10,        &Cpu::JC,       &Cpu::DIR },
         { "IN",     10,        &Cpu::IN,       &Cpu::IMM },
         { "CC",     11,        &Cpu::CC,       &Cpu::DIR },
-        { "CALL",   17,        &Cpu::CALL,     &Cpu::DIR }, // Undocumented
+        { "CALL",   17,        &Cpu::CALL,     &Cpu::DIR },
         { "SBI",     7,        &Cpu::SBI,      &Cpu::IMM },
         { "RST",    11,        &Cpu::RST,      &Cpu::IMP },
         
@@ -309,7 +309,7 @@ Cpu::Cpu() : registers { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
         { "JPE",    10,        &Cpu::JPE,      &Cpu::DIR },
         { "XCHG",    4,        &Cpu::XCHG,     &Cpu::IMP },
         { "CPE",    11,        &Cpu::CPE,      &Cpu::DIR },
-        { "CALL",   17,        &Cpu::CALL,     &Cpu::DIR }, // Undocumented
+        { "CALL",   17,        &Cpu::CALL,     &Cpu::DIR },
         { "XDI",     7,        &Cpu::XRI,      &Cpu::IMM },
         { "RST",    11,        &Cpu::RST,      &Cpu::IMP },
         
@@ -328,7 +328,7 @@ Cpu::Cpu() : registers { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
         { "JM",     10,        &Cpu::JM,       &Cpu::DIR },
         { "EI",      4,        &Cpu::EI,       &Cpu::IMP },
         { "CM",     11,        &Cpu::CM,       &Cpu::DIR },
-        { "CALL",   17,        &Cpu::CALL,     &Cpu::DIR }, // Undocumented
+        { "CALL",   17,        &Cpu::CALL,     &Cpu::DIR },
         { "CPI",     7,        &Cpu::CPI,      &Cpu::IMM },
         { "RST",    11,        &Cpu::RST,      &Cpu::IMP }
     };
@@ -341,8 +341,6 @@ void Cpu::clock()
     if (cycles > 0)
     {
         cycles--;
-        
-        // Emulate clock
         return;
     }
 
@@ -357,16 +355,16 @@ void Cpu::clock()
     counter++;
     
     // Set min program cycles
-    cycles = lookup[opcode].cycles;
+    cycles = commands[opcode].cycles;
     
     // Set address mode
-    (this->*lookup[opcode].addrmod)();
+    (this->*commands[opcode].addrmod)();
     
     // Execute operation and add extra cycles
-    cycles += (this->*lookup[opcode].operate)();
+    cycles += (this->*commands[opcode].operate)();
     
 #ifdef ASMLOG
-    ::log(pcl, this);
+    Asmlog::log(pcl, this);
 #endif
 }
 
@@ -403,26 +401,26 @@ uint16_t Cpu::getCounter()
 #pragma mark Pairs
 
 // Read source register
-uint8_t * Cpu::readsrc()
+uint8_t Cpu::readsrc()
 {
-    return & registers[opcode & 0x07];
+    return registers[opcode & 0x07];
 }
 
 // Read destination register
-uint8_t * Cpu::readdst()
+uint8_t & Cpu::readdst()
 {
-    return & registers[(opcode & 0x38) >> 3];
+    return registers[(opcode & 0x38) >> 3];
 }
 
 // Read registry pair as uint16_t
-uint16_t Cpu::readpair(uint8_t index)
+uint16_t Cpu::readpair(uint8_t index) const
 {
     auto pair = regpairs[index];
     
     uint16_t hi = *(pair + 0);
     uint16_t lo = *(pair + 1);
 
-    return (hi << 8) | lo;
+    return (uint16_t) (hi << 8) | lo;
 }
 
 // Write uint16_t to registry pair
@@ -443,12 +441,12 @@ void Cpu::mutatepair(uint8_t index, std::function<void(uint16_t &)> mutator)
 #pragma mark -
 #pragma mark Bus communications
 
-uint8_t Cpu::read()
+uint8_t Cpu::read() const
 {
     return read(address);
 }
 
-uint8_t Cpu::read(uint16_t address)
+uint8_t Cpu::read(uint16_t address) const
 {
     return bus -> read(address);
 }
@@ -497,7 +495,7 @@ void Cpu::DIR()
     uint16_t lo = read(counter++);
     uint16_t hi = read(counter++);
     
-    address = (hi << 8) | lo;
+    address = (uint16_t) (hi << 8) | lo;
 }
 
 // Set address pointer to D8
@@ -512,7 +510,7 @@ void Cpu::HLM()
     uint16_t lo = registers[L];
     uint16_t hi = registers[H];
     
-    address = (hi << 8) | lo;
+    address = (uint16_t) (hi << 8) | lo;
 }
 
 #pragma mark -
@@ -523,7 +521,7 @@ void Cpu::HLM()
 // Description: Move register to register
 uint8_t Cpu::MOVRR()
 {
-    *readdst() = *readsrc();
+    readdst() = readsrc();
     return 0;
 }
 
@@ -532,7 +530,7 @@ uint8_t Cpu::MOVRR()
 // Description: Move register to memory
 uint8_t Cpu::MOVMR()
 {
-    auto value = *readsrc();
+    auto value = readsrc();
     write(value);
     
     return 0;
@@ -543,7 +541,7 @@ uint8_t Cpu::MOVMR()
 // Description: Move memory to register
 uint8_t Cpu::MOVRM()
 {
-    *readdst() = read();
+    readdst() = read();
     return 0;
 }
 
@@ -565,7 +563,7 @@ uint8_t Cpu::MVIM()
     uint16_t lo = registers[L];
     uint16_t hi = registers[H];
 
-    write((hi << 8) | lo, value);
+    write((uint16_t) (hi << 8) | lo, value);
     
     return 0;
 }
@@ -1152,7 +1150,7 @@ uint8_t Cpu::RST  ()
 // Flags: S,Z,AC,P
 uint8_t Cpu::INR (uint16_t value)
 {
-    *readdst() = ++value & 0x00FF;
+    readdst() = ++value & 0x00FF;
     
     status.SetDecFlags(value);
     status.SetAux((value & 0x000F) == 0);
@@ -1166,7 +1164,7 @@ uint8_t Cpu::INR (uint16_t value)
 // Flags: S,Z,AC,P
 uint8_t Cpu::INRR ()
 {
-    uint16_t value = *readdst();
+    uint16_t value = readdst();
     return INR(value);
 }
 
@@ -1191,7 +1189,7 @@ uint8_t Cpu::INRM ()
 // Flags: S,Z,AC,P
 uint8_t Cpu::DCR (uint16_t value)
 {
-    *readdst() = --value & 0x00FF;
+    readdst() = --value & 0x00FF;
     
     status.SetDecFlags(value);
     status.SetAux((value & 0x000F) != 0x000F);
@@ -1205,7 +1203,7 @@ uint8_t Cpu::DCR (uint16_t value)
 // Flags: S,Z,AC,P
 uint8_t Cpu::DCRR ()
 {
-    uint16_t value = *readdst();
+    uint16_t value = readdst();
     return DCR(value);
 }
 
@@ -1295,7 +1293,7 @@ uint8_t Cpu::ADC(uint8_t data)
 // Flags: S,Z,AC,P,C
 uint8_t Cpu::ADDR ()
 {
-    auto value = *readsrc();
+    auto value = readsrc();
     return ADD(value);
 }
 
@@ -1315,7 +1313,7 @@ uint8_t Cpu::ADDM ()
 // Flags: S,Z,AC,P,C
 uint8_t Cpu::ADCR ()
 {
-    auto value = *readsrc();
+    auto value = readsrc();
     return ADC(value);
 }
 
@@ -1404,7 +1402,7 @@ uint8_t Cpu::SBB(uint8_t data)
 // Flags: S,Z,AC,P,C
 uint8_t Cpu::SUBR ()
 {
-    auto value = *readsrc();
+    auto value = readsrc();
     return SUB(value);
 }
 
@@ -1424,7 +1422,7 @@ uint8_t Cpu::SUBM ()
 // Flags: S,Z,AC,P,C
 uint8_t Cpu::SBBR ()
 {
-    auto value = *readsrc();
+    auto value = readsrc();
     return SBB(value);
 }
 
@@ -1510,7 +1508,7 @@ uint8_t Cpu::CMP (uint8_t value)
 // Flags: S,Z,AC=*,P,C=0
 uint8_t Cpu::ANAR ()
 {
-    auto value = *readsrc();
+    auto value = readsrc();
     return ANA(value);
 }
 
@@ -1530,7 +1528,7 @@ uint8_t Cpu::ANAM ()
 // Flags: S,Z,AC=0,P,C=0
 uint8_t Cpu::XRAR ()
 {
-    auto value = *readsrc();
+    auto value = readsrc();
     return XRA(value);
 }
 
@@ -1550,7 +1548,7 @@ uint8_t Cpu::XRAM ()
 // Flags: S,Z,AC,P,C=0
 uint8_t Cpu::ORAR ()
 {
-    auto value = *readsrc();
+    auto value = readsrc();
     return ORA(value);
 }
 
@@ -1570,7 +1568,7 @@ uint8_t Cpu::ORAM ()
 // Flags: S,Z,AC,P,C
 uint8_t Cpu::CMPR ()
 {
-    auto value = *readsrc();
+    auto value = readsrc();
     return CMP(value);
 }
 
@@ -1796,7 +1794,7 @@ uint8_t Cpu::OUT ()
 // Code: EI
 // Operation: Enable interrup
 // Flags: INTE
-uint8_t Cpu::EI   ()
+uint8_t Cpu::EI ()
 {
     return 0;
 }
@@ -1804,14 +1802,14 @@ uint8_t Cpu::EI   ()
 // Code: DI
 // Operation: Disable interrup
 // Flags: DI
-uint8_t Cpu::DI   ()
+uint8_t Cpu::DI ()
 {
     return 0;
 }
 
 // Code: HLT
 // Operation: Halt
-uint8_t Cpu::HLT  ()
+uint8_t Cpu::HLT ()
 {
     return 0;
 }

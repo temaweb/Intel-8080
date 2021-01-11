@@ -15,42 +15,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Asmlog_hpp
-#define Asmlog_hpp
-
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
 
 #include "Cpu.hpp"
+#include "Asmlog.hpp"
 
 template<class T>
-void print(int width, std::string prefix, T value)
+void Asmlog::print(int width, std::string prefix, T value)
 {
-    std::cout << std::setfill(' ') << prefix
-              << std::setfill('0') << std::setw(width) << std::right << std::hex << unsigned(value);
+    std::cout << std::setfill(delimiter) << prefix
+              << std::setfill(filler) << std::setw(width) << std::right << std::hex << unsigned(value);
 }
 
-void printDivider(int width)
+void Asmlog::printDivider(int width)
 {
-    using namespace std;
-    
-    cout << setfill(' ') << setw(width);
+    std::cout << std::setfill(delimiter) << std::setw(width);
 }
 
-void log(uint16_t counter, Cpu * cpu)
+void Asmlog::log(uint16_t counter, const Cpu * cpu)
 {
-    using namespace std;
-
     auto opcode  = cpu -> opcode;
-    auto addrmod = cpu -> lookup[opcode].addrmod;
+    auto command = cpu -> commands[opcode];
     
-    cout << uppercase;
+    std::cout << std::uppercase;
 
     print(4, "0x", counter);
     print(2,  " ", opcode);
 
-    if (addrmod == &Cpu::DIR)
+    if (command.addrmod == &Cpu::DIR)
     {
         auto lo = cpu -> read(counter + 1);
         auto hi = cpu -> read(counter + 2);
@@ -63,7 +57,7 @@ void log(uint16_t counter, Cpu * cpu)
 
         printDivider(6);
     }
-    else if (addrmod == &Cpu::IMM)
+    else if (command.addrmod == &Cpu::IMM)
     {
         auto value = cpu -> read(counter + 1);
         
@@ -75,7 +69,7 @@ void log(uint16_t counter, Cpu * cpu)
         printDivider(16);
     }
 
-    cout << right << cpu -> lookup[opcode].name;
+    std::cout << std::right << command.name;
 
     print(2, " A:", cpu -> registers[cpu -> A]);
     print(2, " B:", cpu -> registers[cpu -> B]);
@@ -97,15 +91,13 @@ void log(uint16_t counter, Cpu * cpu)
     printReg(cpu -> DE);
     printReg(cpu -> HL);
 
-    cout << "  S="  << unsigned(cpu ->status.GetSign());
-    cout << "  Z="  << unsigned(cpu ->status.GetZero());
-    cout << "  AC=" << unsigned(cpu ->status.GetAux());
-    cout << "  P="  << unsigned(cpu ->status.GetParity());
-    cout << "  C="  << unsigned(cpu ->status.GetCarry());
+    std::cout << "  S="  << unsigned(cpu ->status.GetSign());
+    std::cout << "  Z="  << unsigned(cpu ->status.GetZero());
+    std::cout << "  AC=" << unsigned(cpu ->status.GetAux());
+    std::cout << "  P="  << unsigned(cpu ->status.GetParity());
+    std::cout << "  C="  << unsigned(cpu ->status.GetCarry());
 
     print(4, "  0x", cpu -> stack);
     
-    cout << endl;
+    std::cout << std::endl;
 }
-
-#endif /* Logger_hpp */
