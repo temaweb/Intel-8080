@@ -1794,6 +1794,7 @@ uint8_t Cpu::OUT ()
 // Flags: INTE
 uint8_t Cpu::EI ()
 {
+    io -> enableInterrupt();
     return 0;
 }
 
@@ -1802,6 +1803,7 @@ uint8_t Cpu::EI ()
 // Flags: DI
 uint8_t Cpu::DI ()
 {
+    io -> disableInterrupt();
     return 0;
 }
 

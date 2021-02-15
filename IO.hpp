@@ -27,6 +27,9 @@ public:
     virtual uint8_t read(T address) const = 0;
     virtual void write(T address, uint8_t data) = 0;
     
+    virtual void enableInterrupt () { };
+    virtual void disableInterrupt() { };
+    
     virtual ~IO() = default;
 };
 
