@@ -395,6 +395,11 @@ uint16_t Cpu::getCounter()
     return this -> counter;
 }
 
+uint64_t Cpu::getClock ()
+{
+    return ticks;
+}
+
 #pragma mark -
 #pragma mark Pairs
 

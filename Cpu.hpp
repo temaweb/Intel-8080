@@ -292,6 +292,7 @@ public:
     void connect (std::shared_ptr<IO<uint8_t>>  io);
     
     uint16_t getCounter();
+    uint64_t getClock  ();
     
     virtual ~Cpu() = default;
 };
