@@ -15,17 +15,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Cpu_hpp
-#define Cpu_hpp
+#ifndef CPU_HPP
+#define CPU_HPP
 
 #include <cstdint>
 #include <vector>
 #include <functional>
 #include <memory>
 
-#include "Asmlog.hpp"
-#include "Command.hpp"
-#include "Status.hpp"
+#include "asmlog.hpp"
+#include "command.hpp"
+#include "status.hpp"
 #include "IO.hpp"
 
 class Cpu
@@ -297,4 +297,4 @@ public:
     virtual ~Cpu() = default;
 };
 
-#endif /* Cpu_hpp */
+#endif /* CPU_HPP */

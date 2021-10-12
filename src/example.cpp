@@ -19,7 +19,7 @@
 #include <array>
 
 #include "IO.hpp"
-#include "Cpu.hpp"
+#include "cpu.hpp"
 
 // Test starting at
 static const uint16_t offset = 0x0100;
@@ -120,10 +120,10 @@ int main(int argc, const char * argv[])
     
     const std::string exercisers[4]
     {
-        "exerciser/CPUTEST.com",
-        "exerciser/8080.com",
-        "exerciser/8080PRE.com",
-        "exerciser/8080EXM.com"
+        "../asm/CPUTEST.com",
+        "../asm/8080.com",
+        "../asm/8080PRE.com",
+        "../asm/8080EXM.com"
     };
 
     for (auto exerciser : exercisers)

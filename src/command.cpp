@@ -15,26 +15,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Asmlog_hpp
-#define Asmlog_hpp
+#include "cpu.hpp"
+#include "command.hpp"
 
-#include <cstdint>
-
-class Cpu;
-
-class Asmlog
+bool Command::isImplied()
 {
-private:
-    constexpr static char delimiter = ' ';
-    constexpr static char filler    = '0';
-    
-    template<typename T>
-    static void print(int width, std::string prefix, T value);
-    
-    static void printDivider(int width);
-    
-public:
-    static void log(uint16_t counter, const Cpu * cpu);
-};
+    return addrmod == &Cpu::IMP;
+}
 
-#endif /* Asmlog_hpp */
+bool Command::isIndirect()
+{
+    return addrmod == &Cpu::DIR;
+}

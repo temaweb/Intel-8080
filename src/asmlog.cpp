@@ -19,8 +19,8 @@
 #include <iomanip>
 #include <iostream>
 
-#include "Cpu.hpp"
-#include "Asmlog.hpp"
+#include "cpu.hpp"
+#include "asmlog.hpp"
 
 template<class T>
 void Asmlog::print(int width, std::string prefix, T value)

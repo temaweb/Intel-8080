@@ -15,24 +15,37 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Command_h
-#define Command_h
+#ifndef IO_HPP
+#define IO_HPP
 
-#include <string>
+#include <iostream>
 
-struct Command
+template<typename T>
+class IO
 {
-    // Operation name
-    std::string name;
+public:
+    virtual uint8_t read(T address) const = 0;
+    virtual void write(T address, uint8_t data) = 0;
     
-    // Operation cycles
-    uint8_t cycles = 0x00;
-
-    uint8_t (Cpu::*operate) (void) = nullptr;
-    void    (Cpu::*addrmod) (void) = nullptr;
+    virtual void enableInterrupt () { };
+    virtual void disableInterrupt() { };
     
-    bool isImplied();
-    bool isIndirect();
+    virtual ~IO() = default;
 };
 
-#endif /* Command_h */
+template<typename T>
+class DefaultIO final : public IO<T>
+{
+public:
+    virtual uint8_t read(T) const override
+    {
+        return 0x00;
+    }
+    
+    virtual void write(T, uint8_t) override
+    {
+        
+    }
+};
+
+#endif /* IO_HPP */

@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Status_hpp
-#define Status_hpp
+#ifndef STATUS_HPP
+#define STATUS_HPP
 
 #include <cstdint>
 
@@ -87,4 +87,4 @@ public:
     uint8_t GetCarry()  const;
 };
 
-#endif /* Status_hpp */
+#endif /* STATUS_HPP */
