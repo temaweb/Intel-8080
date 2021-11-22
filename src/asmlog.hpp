@@ -19,6 +19,7 @@
 #define ASMLOG_HPP
 
 #include <cstdint>
+#include <string>
 
 class Cpu;
 
